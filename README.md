@@ -1,1 +1,1 @@
-# gallery-website
+# Gallery Website
