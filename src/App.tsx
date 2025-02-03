@@ -23,6 +23,7 @@ function App() {
   const [page, setPage] = useState(1);
   // const [pagesLeft, setPagesLeft] = useState(true);
   const apiKey: string = import.meta.env.VITE_APP_KEY;
+  
   useEffect(() => {
     // setCache(localStorage.get("cache", JSON.stringify(cache)));
     // setMainPage(response);
@@ -55,6 +56,7 @@ function App() {
   }
 
   function fetchData(page: number) {
+    console.log(page);
     let key: string;
     let call: string;
     const cleanedQuery = query.trim().toLocaleLowerCase();
@@ -67,7 +69,15 @@ function App() {
       call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=20`;
     }
     if (key in cache) {
-      setMainPage(cache[key]);
+      if (page > 1) {
+        setMainPage([
+          ...mainPage,
+          ...cache[key]
+      ]);
+      } else {
+        setMainPage(cache[key]);
+      }
+      
       console.log("retrieved from cache");
     } else {
       fetch(call)
@@ -102,7 +112,7 @@ function App() {
       <input type="text" onChange={queryInputHandler}/>
       <button onClick={addMoreHandler}>Add more</button>
 
-      <div style={{display: "flex", flexWrap: "wrap"}}>
+      <div style={{width: "50%", display: "grid", gridTemplateColumns: "1fr 1fr"}}>
         {mainPage.map((pic: pictureResponse) => {
           return (
             <div key={pic.id}>
