@@ -12,14 +12,18 @@ interface pictureResponse {
   [propName: string]: unknown
 }
 
+interface cache {
+  [propName: string]: pictureResponse[]
+}
+
 function App() {
-  // const [cache, setCache] = useState([]);
+  const [cache, setCache] = useState<cache>({});
   const [mainPage, setMainPage] = useState<pictureResponse[]>([]);
   const [query, setQuery] = useState("");
-
+  const apiKey: string = import.meta.env.VITE_APP_KEY;
   useEffect(() => {
     // setCache(localStorage.get("cache", JSON.stringify(cache)));
-    // fetch("https://api.unsplash.com/photos?client_id=MY_API")
+    // fetch(`https://api.unsplash.com/photos?client_id=${apiKey}`)
     //   .then((response) => response.json())
     //   .then(json => setMainPage(json));
     setMainPage(response);
@@ -41,10 +45,24 @@ function App() {
     setQuery(e.target.value);
   }
 
-  function searchQuery(query: string) {
-    fetch(`https://api.unsplash.com/search/photos?client_id=hmYdWZI9yjeFowfgT5e4b3xscGXbxj7Hz-ZqAvjYpy0&query=${query}`)
-    .then((response) => response.json())
-    .then(json => setMainPage(json.results));
+  function searchQuery(query: string, page = 1) {
+    const key = `${query}-${page}`;
+    if (key in cache) {
+      setMainPage(cache[key]);
+      console.log("retrieved from cache");
+    } else {
+      fetch(`https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${query}&page=${page}`)
+      .then((response) => response.json())
+      .then(json => {
+        setMainPage(json.results);
+        const newCache = {
+          ...cache,
+          [key]: json.results
+        } 
+        setCache(newCache);
+        console.log("retrieved new");
+    });
+    }  
   }
 
   // function handleScroll(e: React.UIEvent<HTMLElement>) {
