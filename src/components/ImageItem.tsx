@@ -35,6 +35,7 @@ export default function ImageItem({pic, refProp} : {pic: pictureResponse, refPro
             downloadSpan!.textContent = downloads;
             likesSpan!.textContent = likes;
             viewsSpan!.textContent = views;
+            modal?.classList.remove("closed");
             modal?.showModal();
         })
     }

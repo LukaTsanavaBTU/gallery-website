@@ -120,7 +120,7 @@ export default function ImageContainer({query} : {query: string}) {
 
     return (
     <>
-        <dialog>
+        <dialog className="closed">
             <div className="close">X</div>
             <div className="full-image">
                 <img src="" alt="" />
