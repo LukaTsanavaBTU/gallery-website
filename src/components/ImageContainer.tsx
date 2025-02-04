@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, RefObject } from "react";
 import { pictureResponse, cache } from "../App";
 import ImageItem from "./ImageItem";
+import spinnerSvg from "../assets/spinner.svg";
+import "./ImageContainer.css";
 
 export default function ImageContainer({query} : {query: string}) {
     const [cache, setCache] = useState<cache>({});
@@ -104,8 +106,9 @@ export default function ImageContainer({query} : {query: string}) {
 
     return (
     <>
-        <div style={{width: "50%", display: "grid", gridTemplateColumns: "1fr 1fr"}}>
-            {mainPage.map((pic: pictureResponse, index: number) => {
+        <div className="image-container">
+            {mainPage.length > 0 
+            ? mainPage.map((pic: pictureResponse, index: number) => {
                 if (index === mainPage.length - 1) {
                 return (
                     <ImageItem pic={pic} refProp={lastElemRef}  key={pic.id} />
@@ -114,7 +117,10 @@ export default function ImageContainer({query} : {query: string}) {
                 return (
                     <ImageItem pic={pic} key={pic.id} />
                 );
-            })}
+            }) 
+            : <div className="spin-container">
+                <img className="spinner" src={spinnerSvg} alt="Loading"/>
+            </div>}
         </div>
     </>
     )

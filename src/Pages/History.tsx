@@ -21,18 +21,21 @@ export default function History() {
         return extracted;
     }
     return (
-    <>
-        <Navigation/>
-        <select onChange={queryChangeHandler}>
-            <option value="MAIN">Main Page</option>
-            {options.map(option => {
-                return (
-                    <option key={option} value={option}>{option}</option>
-                );
-            })}
-        </select>
-
-        <ImageContainer query={query}/>
+    <>  
+        <header>
+            <Navigation selected="history"/>
+        </header>
+        <main>
+            <select onChange={queryChangeHandler}>
+                <option value="MAIN">Main Page</option>
+                {options.map(option => {
+                    return (
+                        <option key={option} value={option}>{option}</option>
+                    );
+                })}
+            </select>
+            <ImageContainer query={query}/>
+        </main>
     </>
     )
 }

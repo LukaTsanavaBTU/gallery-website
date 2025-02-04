@@ -12,9 +12,13 @@ export default function Home() {
 
   return (
     <>
-      <Navigation/>
-      <input type="text" value={query} onChange={queryInputHandler}/>
-      <ImageContainer query={query}/>
+      <header>
+        <Navigation selected="home" />
+      </header>
+      <main>
+        <input type="text" value={query} onChange={queryInputHandler} placeholder='Search...'/>
+        <ImageContainer query={query}/>
+      </main>
     </>
   )
 }

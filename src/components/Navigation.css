@@ -1,0 +1,24 @@
+.page-nav {
+    padding: 30px;
+    border-bottom: 2px solid var(--background-secondary-clr);
+    ul {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+    }
+    li {
+        transition: opacity 0.5s;
+    }
+    li:not(.selected) {
+        opacity: 50%;
+    }
+    li:hover {
+        opacity: 110%;
+    }
+    a {
+        font-family: var(--system-font);
+        color: var(--system-font);
+        text-decoration: none;
+        font-size: 2rem ;
+    }
+}
