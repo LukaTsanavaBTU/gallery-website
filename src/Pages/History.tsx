@@ -1,5 +1,6 @@
 import ImageContainer from '../components/ImageContainer';
 import React, { useState } from 'react';
+import Navigation from '../components/Navigation';
 
 export default function History() {
     const [query, setQuery] = useState("");
@@ -13,7 +14,6 @@ export default function History() {
     function extractOptions(rawJson: string) {
         let extracted = Object.keys(JSON.parse(rawJson));
         extracted = extracted.map(option => {
-            console.log(option.split("-").slice(0, -1).join(""));
             return option.split("-").slice(0, -1).join("");
         });
         extracted = [...new Set(extracted)];
@@ -22,6 +22,7 @@ export default function History() {
     }
     return (
     <>
+        <Navigation/>
         <select onChange={queryChangeHandler}>
             <option value="MAIN">Main Page</option>
             {options.map(option => {

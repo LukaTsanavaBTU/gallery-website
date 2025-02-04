@@ -1,5 +1,6 @@
 import ImageContainer from '../components/ImageContainer';
 import React, { useState } from 'react';
+import Navigation from '../components/Navigation';
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -11,8 +12,8 @@ export default function Home() {
 
   return (
     <>
+      <Navigation/>
       <input type="text" value={query} onChange={queryInputHandler}/>
-
       <ImageContainer query={query}/>
     </>
   )
