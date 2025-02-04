@@ -9,8 +9,10 @@ export default function ImageContainer({query} : {query: string}) {
     const [loadedCache, setLoadedCache] = useState(false);
     const [mainPage, setMainPage] = useState<pictureResponse[]>([]);
     const [page, setPage] = useState(1);
+    const [imagesLeft, setImagesLeft] = useState(true);
     const lastElemRef = useRef() as RefObject<HTMLDivElement>;
     const observer = new IntersectionObserver(intersectionCallback, { rootMargin: "200px" });
+    // const modalRef = useRef() as RefObject<HTMLDialogElement>;
     const apiKey: string = import.meta.env.VITE_APP_KEY;
 
     useEffect(() => {
@@ -47,6 +49,7 @@ export default function ImageContainer({query} : {query: string}) {
 
     function searchQuery() {
     setPage(1);
+    setImagesLeft(true);
     fetchData(1);
     }
 
@@ -59,53 +62,73 @@ export default function ImageContainer({query} : {query: string}) {
     function fetchData(page: number) {
     let key: string;
     let call: string;
+    const perPage = 20;
     const cleanedQuery = query.trim().toLocaleLowerCase();
     const isMain = cleanedQuery === "";
     if (isMain) {
         key = `MAIN-${page}`;
-        call = `https://api.unsplash.com/photos?client_id=${apiKey}&page=${page}&per_page=20`;
+        call = `https://api.unsplash.com/photos?client_id=${apiKey}&page=${page}&per_page=${perPage + 2}`;
     } else {
         key = `${cleanedQuery}-${page}`;
-        call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=20`;
+        call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=${perPage}`;
     }
-    if (key in cache) {
-        if (page > 1) {
-        setMainPage([
-            ...mainPage,
-            ...cache[key]
-        ]);
-        } else {
-        setMainPage(cache[key]);
-        }
-        
-        console.log("retrieved from cache");
-    } else {
-        fetch(call)
-        .then((response) => response.json())
-        .then(json => {
-        const results = isMain ? json.slice(0, -2) : json.results; // We have to remove last 2 elements because unsplash returns duplicate images from main pages
-        if (page > 1) {
+    if (imagesLeft) {
+        if (key in cache) {
+            if (page > 1) {
             setMainPage([
-            ...mainPage,
-            ...results
+                ...mainPage,
+                ...cache[key]
             ]);
-        }
-        else {
-            setMainPage(results);
-        }
-        const newCache = {
-            ...cache,
-            [key]: results
-        } 
-        setCache(newCache);
-        window.localStorage.setItem("cache", JSON.stringify(newCache));
-        console.log("retrieved new");
-        });
-    }  
+            } else {
+            setMainPage(cache[key]);
+            }
+            if (cache[key].length < (perPage / 2))  {
+                setImagesLeft(false);
+                console.log("no more images to fetch");
+            }
+            console.log("retrieved from cache");
+        } else {
+            fetch(call)
+            .then((response) => response.json())
+            .then(json => {
+            const results = isMain ? json.slice(0, -2) : json.results; // We have to remove last 2 elements because unsplash returns duplicate images from main pages
+            if (page > 1) {
+                setMainPage([
+                ...mainPage,
+                ...results
+                ]);
+            }
+            else {
+                setMainPage(results);
+            }
+            const newCache = {
+                ...cache,
+                [key]: results
+            } 
+            setCache(newCache);
+            window.localStorage.setItem("cache", JSON.stringify(newCache));
+            if (results.length < (perPage / 2)) {
+                setImagesLeft(false);
+                console.log("no more images to fetch");
+            }
+            console.log("retrieved new");
+            });
+        }  
+    } else {
+        console.log("Not fetching");
+    }
     }
 
     return (
     <>
+        {/* <dialog ref={modalRef}>
+            <div className="full-image">
+                <img src="" alt="" />
+            </div>
+            <div>Downloads: <span>1000</span></div>
+            <div>Likes: <span>1000</span></div>
+            <div>Views: <span>1000</span></div>
+        </dialog> */}
         <div className="image-container">
             {mainPage.length > 0 
             ? mainPage.map((pic: pictureResponse, index: number) => {
