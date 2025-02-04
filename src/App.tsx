@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { RefObject, useEffect, useRef, useState } from 'react'
 import './App.css'
 // import response from "./tempResponse.js"
 
@@ -22,8 +22,10 @@ function App() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   // const [pagesLeft, setPagesLeft] = useState(true);
+  const lastElemRef = useRef() as RefObject<HTMLDivElement>;
+  const observer = new IntersectionObserver(intersectionCallback, { rootMargin: "200px" });
   const apiKey: string = import.meta.env.VITE_APP_KEY;
-  
+
   useEffect(() => {
     // setCache(localStorage.get("cache", JSON.stringify(cache)));
     // setMainPage(response);
@@ -37,7 +39,21 @@ function App() {
     return () => {
       clearTimeout(inputTimer);
     }
-}, [query]);
+  }, [query]);
+
+  useEffect(() => {
+    if (lastElemRef.current != null) {
+      observer.observe(lastElemRef.current);
+    }
+  }, [mainPage]);
+
+  function intersectionCallback(entries: IntersectionObserverEntry[]) {
+    const entry = entries[0];
+    if (entry.isIntersecting) {
+      addMoreHandler();
+      observer.unobserve(entry.target);
+    }
+  }
 
   function queryInputHandler(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
@@ -56,7 +72,6 @@ function App() {
   }
 
   function fetchData(page: number) {
-    console.log(page);
     let key: string;
     let call: string;
     const cleanedQuery = query.trim().toLocaleLowerCase();
@@ -109,11 +124,18 @@ function App() {
 
   return (
     <>
-      <input type="text" onChange={queryInputHandler}/>
+      <input type="text" value={query} onChange={queryInputHandler}/>
       <button onClick={addMoreHandler}>Add more</button>
 
       <div style={{width: "50%", display: "grid", gridTemplateColumns: "1fr 1fr"}}>
-        {mainPage.map((pic: pictureResponse) => {
+        {mainPage.map((pic: pictureResponse, index: number) => {
+          if (index === mainPage.length - 1) {
+            return (
+              <div ref={lastElemRef}  key={pic.id}>
+                <img src={pic.urls.regular} alt={pic.alt_description} style={{width: "200px"}}/>
+              </div>
+            );
+          }
           return (
             <div key={pic.id}>
               <img src={pic.urls.regular} alt={pic.alt_description} style={{width: "200px"}}/>
