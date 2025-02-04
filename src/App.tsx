@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
 import './App.css';
-import ImageContainer from './components/ImageContainer';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './Pages/Home';
+import History from './Pages/History';
 
 export interface pictureResponse {
   id: string,
@@ -17,20 +18,15 @@ export interface cache {
 }
 
 function App() {
-  const [query, setQuery] = useState("");
-
-  function queryInputHandler(e: React.ChangeEvent<HTMLInputElement>) {
-    e.preventDefault();
-    setQuery(e.target.value);
-  }
-
   return (
-    <>
-      <input type="text" value={query} onChange={queryInputHandler}/>
-
-      <ImageContainer query={query}/>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route index element={ <Home/> }></Route>
+        <Route path="/home" element={ <Home/> }></Route>
+        <Route path="/history" element={ <History/> }></Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App
