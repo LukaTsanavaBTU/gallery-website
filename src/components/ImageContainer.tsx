@@ -12,7 +12,6 @@ export default function ImageContainer({query} : {query: string}) {
     const [imagesLeft, setImagesLeft] = useState(true);
     const lastElemRef = useRef() as RefObject<HTMLDivElement>;
     const observer = new IntersectionObserver(intersectionCallback, { rootMargin: "200px" });
-    // const modalRef = useRef() as RefObject<HTMLDialogElement>;
     const apiKey: string = import.meta.env.VITE_APP_KEY;
 
     useEffect(() => {
@@ -121,14 +120,15 @@ export default function ImageContainer({query} : {query: string}) {
 
     return (
     <>
-        {/* <dialog ref={modalRef}>
+        <dialog>
+            <div className="close">X</div>
             <div className="full-image">
                 <img src="" alt="" />
             </div>
-            <div>Downloads: <span>1000</span></div>
-            <div>Likes: <span>1000</span></div>
-            <div>Views: <span>1000</span></div>
-        </dialog> */}
+            <div className="downloads">Downloads: <span>1000</span></div>
+            <div className="likes">Likes: <span>1000</span></div>
+            <div className="views">Views: <span>1000</span></div>
+        </dialog>
         <div className="image-container">
             {mainPage.length > 0 
             ? mainPage.map((pic: pictureResponse, index: number) => {
@@ -138,7 +138,7 @@ export default function ImageContainer({query} : {query: string}) {
                 );
                 }
                 return (
-                    <ImageItem pic={pic} key={pic.id} />
+                    <ImageItem  pic={pic} key={pic.id} />
                 );
             }) 
             : <div className="spin-container">
