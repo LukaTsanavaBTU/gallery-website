@@ -18,6 +18,7 @@ interface cache {
 
 function App() {
   const [cache, setCache] = useState<cache>({});
+  const [loadedCache, setLoadedCache] = useState(false);
   const [mainPage, setMainPage] = useState<pictureResponse[]>([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -29,17 +30,22 @@ function App() {
   useEffect(() => {
     // setCache(localStorage.get("cache", JSON.stringify(cache)));
     // setMainPage(response);
-    searchQuery();  
+    const localCache = window.localStorage.getItem("cache");
+    if (localCache != null) {
+      setCache(JSON.parse(localCache));
+    }
+    setLoadedCache(true);
   }, []);
 
   useEffect(() => {
+    if (!loadedCache) return;
     const inputTimer = setTimeout(() => {
       searchQuery();
     }, 1000);
     return () => {
       clearTimeout(inputTimer);
     }
-  }, [query]);
+  }, [query, loadedCache]);
 
   useEffect(() => {
     if (lastElemRef.current != null) {
@@ -83,6 +89,7 @@ function App() {
       key = `${cleanedQuery}-${page}`;
       call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=20`;
     }
+    console.log(call);
     if (key in cache) {
       if (page > 1) {
         setMainPage([
@@ -113,6 +120,7 @@ function App() {
           [key]: results
         } 
         setCache(newCache);
+        window.localStorage.setItem("cache", JSON.stringify(newCache));
         console.log("retrieved new");
       });
     }  
