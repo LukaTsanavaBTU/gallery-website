@@ -5,6 +5,12 @@ import spinnerSvg from "../assets/spinner.svg";
 import "./ImageContainer.css";
 import Modal from "./Modal";
 
+export interface infoResponse  {
+    views: number,
+    likes: number,
+    downloads: number
+}
+
 export default function ImageContainer({query} : {query: string}) {
     const [cache, setCache] = useState<cache>({});
     const [loadedCache, setLoadedCache] = useState(false);
@@ -12,7 +18,7 @@ export default function ImageContainer({query} : {query: string}) {
     const [page, setPage] = useState(1);
     const [imagesLeft, setImagesLeft] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
-    // const [modalImg, setModalImg] = useState<pictureResponse | undefined>();
+    const [modalContent, setModalmodalContent] = useState<{pic : pictureResponse, info : infoResponse} | undefined>();
     const lastElemRef = useRef() as RefObject<HTMLDivElement>;
     const observer = new IntersectionObserver(intersectionCallback, { rootMargin: "200px" });
     const apiKey: string = import.meta.env.VITE_APP_KEY;
@@ -121,8 +127,19 @@ export default function ImageContainer({query} : {query: string}) {
         }
     }
 
-    function openModalHandler() {
-        setModalOpen(true);
+    function openModalHandler(pic: pictureResponse) {
+        fetch(`https://api.unsplash.com//photos/${pic.id}/statistics?client_id=${apiKey}`)
+        .then(response => response.json())
+        .then(json => {
+            const info : infoResponse = {
+                views: json.views.total,
+                likes: json.likes.total,
+                downloads: json.downloads.total
+            };
+            setModalmodalContent({pic, info});
+            setModalOpen(true);
+        })
+       
     }
 
     function closeModalHandler() {
@@ -131,17 +148,17 @@ export default function ImageContainer({query} : {query: string}) {
 
     return (
     <>
-        {modalOpen && <Modal closeModalHandler={closeModalHandler}/>}
+        {(modalOpen && modalContent) && <Modal closeModalHandler={closeModalHandler} modalImg={modalContent.pic} modalInfo={modalContent.info}/>}
         <div className="image-container">
             {mainPage.length > 0 
             ? mainPage.map((pic: pictureResponse, index: number) => {
                 if (index === mainPage.length - 1) {
                 return (
-                    <ImageItem pic={pic} clickHandler={openModalHandler} refProp={lastElemRef} key={pic.id} />
+                    <ImageItem pic={pic} clickHandler={() => openModalHandler(pic)} refProp={lastElemRef} key={pic.id} />
                 );
                 }
                 return (
-                    <ImageItem  pic={pic} clickHandler={openModalHandler} key={pic.id} />
+                    <ImageItem  pic={pic} clickHandler={() => openModalHandler(pic)} key={pic.id} />
                 );
             }) 
             : <div className="spin-container">
