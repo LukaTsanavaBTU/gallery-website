@@ -1,9 +1,9 @@
 import React from "react";
 import { pictureResponse } from "../App";
 
-export default function ImageItem({pic, refProp} : {pic: pictureResponse, refProp?: React.RefObject<HTMLDivElement>}) {
+export default function ImageItem({pic, clickHandler, refProp} : {pic: pictureResponse, clickHandler: () => void, refProp?: React.RefObject<HTMLDivElement>}) {
     return (
-        <div ref={refProp}>
+        <div onClick={clickHandler} ref={refProp}>
             <img src={pic.urls.regular} alt={pic.alt_description}/>
         </div>
     );

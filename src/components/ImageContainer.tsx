@@ -3,6 +3,7 @@ import { pictureResponse, cache } from "../App";
 import ImageItem from "./ImageItem";
 import spinnerSvg from "../assets/spinner.svg";
 import "./ImageContainer.css";
+import Modal from "./Modal";
 
 export default function ImageContainer({query} : {query: string}) {
     const [cache, setCache] = useState<cache>({});
@@ -10,6 +11,8 @@ export default function ImageContainer({query} : {query: string}) {
     const [mainPage, setMainPage] = useState<pictureResponse[]>([]);
     const [page, setPage] = useState(1);
     const [imagesLeft, setImagesLeft] = useState(true);
+    const [modalOpen, setModalOpen] = useState(false);
+    // const [modalImg, setModalImg] = useState<pictureResponse | undefined>();
     const lastElemRef = useRef() as RefObject<HTMLDivElement>;
     const observer = new IntersectionObserver(intersectionCallback, { rootMargin: "200px" });
     const apiKey: string = import.meta.env.VITE_APP_KEY;
@@ -118,18 +121,27 @@ export default function ImageContainer({query} : {query: string}) {
         }
     }
 
+    function openModalHandler() {
+        setModalOpen(true);
+    }
+
+    function closeModalHandler() {
+        setModalOpen(false);
+    }
+
     return (
     <>
+        {modalOpen && <Modal closeModalHandler={closeModalHandler}/>}
         <div className="image-container">
             {mainPage.length > 0 
             ? mainPage.map((pic: pictureResponse, index: number) => {
                 if (index === mainPage.length - 1) {
                 return (
-                    <ImageItem pic={pic} refProp={lastElemRef} key={pic.id} />
+                    <ImageItem pic={pic} clickHandler={openModalHandler} refProp={lastElemRef} key={pic.id} />
                 );
                 }
                 return (
-                    <ImageItem  pic={pic} key={pic.id} />
+                    <ImageItem  pic={pic} clickHandler={openModalHandler} key={pic.id} />
                 );
             }) 
             : <div className="spin-container">
