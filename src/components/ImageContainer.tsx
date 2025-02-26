@@ -15,126 +15,117 @@ export default function ImageContainer({query} : {query: string}) {
     const apiKey: string = import.meta.env.VITE_APP_KEY;
 
     useEffect(() => {
-    const localCache = window.localStorage.getItem("cache");
-    if (localCache != null) {
-        setCache(JSON.parse(localCache));
-    }
-    setLoadedCache(true);
+        const localCache = window.localStorage.getItem("cache");
+        if (localCache != null) {
+            setCache(JSON.parse(localCache));
+        }
+        setLoadedCache(true);
     }, []);
 
     useEffect(() => {
-    if (!loadedCache) return;
-    const inputTimer = setTimeout(() => {
-        searchQuery();
-    }, 1000);
-    return () => {
-        clearTimeout(inputTimer);
-    }
+        if (!loadedCache) return;
+        const inputTimer = setTimeout(() => {
+            searchQuery();
+        }, 1000);
+        return () => {
+            clearTimeout(inputTimer);
+        }
     }, [query, loadedCache]);
 
     useEffect(() => {
-    if (lastElemRef.current != null) {
-        observer.observe(lastElemRef.current);
-    }
+        if (lastElemRef.current != null) {
+            observer.observe(lastElemRef.current);
+        }
     }, [mainPage]);
 
     function intersectionCallback(entries: IntersectionObserverEntry[]) {
-    const entry = entries[0];
-    if (entry.isIntersecting) {
-        addMoreHandler();
-        observer.unobserve(entry.target);
-    }
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+            addMoreHandler();
+            observer.unobserve(entry.target);
+        }
     }
 
     function searchQuery() {
-    setPage(1);
-    setImagesLeft(true);
-    fetchData(1);
+        setPage(1);
+        setImagesLeft(true);
+        fetchData(1);
     }
 
     function addMoreHandler() {
-    const newPage = page + 1;
-    setPage(newPage);
-    fetchData(newPage);
+        const newPage = page + 1;
+        setPage(newPage);
+        fetchData(newPage);
     }
 
     function fetchData(page: number) {
-    let key: string;
-    let call: string;
-    const perPage = 20;
-    const cleanedQuery = query.trim().toLocaleLowerCase();
-    const isMain = cleanedQuery === "";
-    if (isMain) {
-        key = `MAIN-${page}`;
-        call = `https://api.unsplash.com/photos?client_id=${apiKey}&page=${page}&per_page=${perPage + 2}`;
-    } else {
-        key = `${cleanedQuery}-${page}`;
-        call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=${perPage}`;
-    }
-    if (imagesLeft) {
-        if (key in cache) {
-            if (page > 1) {
-            setMainPage([
-                ...mainPage,
-                ...cache[key]
-            ]);
-            } else {
-            setMainPage(cache[key]);
-            }
-            if (cache[key].length < (perPage / 2))  {
-                setImagesLeft(false);
-                console.log("no more images to fetch");
-            }
-            console.log("retrieved from cache");
+        let key: string;
+        let call: string;
+        const perPage = 20;
+        const cleanedQuery = query.trim().toLocaleLowerCase();
+        const isMain = cleanedQuery === "";
+        if (isMain) {
+            key = `MAIN-${page}`;
+            call = `https://api.unsplash.com/photos?client_id=${apiKey}&page=${page}&per_page=${perPage}`;
         } else {
-            fetch(call)
-            .then((response) => response.json())
-            .then(json => {
-            const results = isMain ? json.slice(0, -2) : json.results; // We have to remove last 2 elements because unsplash returns duplicate images from main pages
-            if (page > 1) {
+            key = `${cleanedQuery}-${page}`;
+            call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=${perPage}`;
+        }
+        if (imagesLeft) {
+            if (key in cache) {
+                if (page > 1) {
                 setMainPage([
-                ...mainPage,
-                ...results
+                    ...mainPage,
+                    ...cache[key]
                 ]);
-            }
-            else {
-                setMainPage(results);
-            }
-            const newCache = {
-                ...cache,
-                [key]: results
-            } 
-            setCache(newCache);
-            window.localStorage.setItem("cache", JSON.stringify(newCache));
-            if (results.length < (perPage / 2)) {
-                setImagesLeft(false);
-                console.log("no more images to fetch");
-            }
-            console.log("retrieved new");
-            });
-        }  
-    } else {
-        console.log("Not fetching");
-    }
+                } else {
+                setMainPage(cache[key]);
+                }
+                if (cache[key].length < (perPage / 2))  {
+                    setImagesLeft(false);
+                    console.log("no more images to fetch");
+                }
+                console.log("retrieved from cache");
+            } else {
+                fetch(call)
+                .then((response) => response.json())
+                .then(json => {
+                const results = isMain ? json.slice(0, -2) : json.results; // We have to remove last 2 elements because unsplash returns duplicate images from main pages
+                if (page > 1) {
+                    setMainPage([
+                    ...mainPage,
+                    ...results
+                    ]);
+                }
+                else {
+                    setMainPage(results);
+                }
+                const newCache = {
+                    ...cache,
+                    [key]: results
+                } 
+                setCache(newCache);
+                window.localStorage.setItem("cache", JSON.stringify(newCache));
+                if (results.length < (perPage / 2)) {
+                    setImagesLeft(false);
+                    console.log("no more images to fetch");
+                }
+                console.log("retrieved new");
+                });
+            }  
+        } else {
+            console.log("Not fetching");
+        }
     }
 
     return (
     <>
-        <dialog className="closed">
-            <div className="close">X</div>
-            <div className="full-image">
-                <img src="" alt="" />
-            </div>
-            <div className="downloads">Downloads: <span>1000</span></div>
-            <div className="likes">Likes: <span>1000</span></div>
-            <div className="views">Views: <span>1000</span></div>
-        </dialog>
         <div className="image-container">
             {mainPage.length > 0 
             ? mainPage.map((pic: pictureResponse, index: number) => {
                 if (index === mainPage.length - 1) {
                 return (
-                    <ImageItem pic={pic} refProp={lastElemRef}  key={pic.id} />
+                    <ImageItem pic={pic} refProp={lastElemRef} key={pic.id} />
                 );
                 }
                 return (
