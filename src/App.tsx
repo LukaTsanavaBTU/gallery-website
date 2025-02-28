@@ -3,6 +3,7 @@ import "./styles/reset.css";
 import './App.css';
 import Home from './Pages/Home';
 import History from './Pages/History';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export interface pictureResponse {
   id: string,
@@ -18,15 +19,19 @@ export interface cache {
   [propName: string]: pictureResponse[]
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route index element={ <Home/> }></Route>
-        <Route path="/home" element={ <Home/> }></Route>
-        <Route path="/history" element={ <History/> }></Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route index element={ <Home/> }></Route>
+          <Route path="/home" element={ <Home/> }></Route>
+          <Route path="/history" element={ <History/> }></Route>
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

@@ -139,7 +139,6 @@ export default function ImageContainer({query} : {query: string}) {
             setModalmodalContent({pic, info});
             setModalOpen(true);
         })
-       
     }
 
     function closeModalHandler() {
