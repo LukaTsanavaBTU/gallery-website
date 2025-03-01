@@ -15,10 +15,6 @@ export interface pictureResponse {
   [propName: string]: unknown
 }
 
-export interface cache {
-  [propName: string]: pictureResponse[]
-}
-
 const queryClient = new QueryClient();
 
 function App() {
