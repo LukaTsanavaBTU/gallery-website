@@ -1,14 +1,24 @@
 import ImageContainer from '../components/ImageContainer';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 
 export default function Home() {
+  const [searchVal, setSearchVal] = useState("");
   const [query, setQuery] = useState("");
 
-  function queryInputHandler(e: React.ChangeEvent<HTMLInputElement>) {
+  function searchInputHandler(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
-    setQuery(e.target.value);
+    setSearchVal(e.target.value);
   }
+
+  useEffect(() => {
+      const inputTimer = setTimeout(() => {
+          setQuery(searchVal);
+      }, 1000);
+      return () => {
+          clearTimeout(inputTimer);
+      }
+  }, [searchVal]);
 
   return (
     <>
@@ -16,7 +26,7 @@ export default function Home() {
         <Navigation selected="home" />
       </header>
       <main>
-        <input type="text" value={query} onChange={queryInputHandler} placeholder='Search...'/>
+        <input type="text" value={searchVal} onChange={searchInputHandler} placeholder='Search...'/>
         <ImageContainer query={query}/>
       </main>
     </>

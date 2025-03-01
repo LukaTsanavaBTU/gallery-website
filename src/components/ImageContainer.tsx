@@ -4,6 +4,7 @@ import ImageItem from "./ImageItem";
 import spinnerSvg from "../assets/spinner.svg";
 import "./ImageContainer.css";
 import Modal from "./Modal";
+import { useQuery } from "@tanstack/react-query";
 
 export interface infoResponse  {
     views: number,
@@ -42,24 +43,24 @@ export default function ImageContainer({query} : {query: string}) {
     // SearchBar Logic
 
     useEffect(() => {
-        const inputTimer = setTimeout(() => {
-            setPage(1);
+        setPage(1);
         setImagesLeft(true);
-        }, 1000);
-        return () => {
-            clearTimeout(inputTimer);
-        }
     }, [query]);
 
     
     // Fetching
 
+    const {data: images, isLoading} = useQuery({
+        queryFn: () => fetchImages(),
+        queryKey: ["images", {page, query}], 
+    });
+
     useEffect(() => {
-        displayImages();
-    }, [page]);
+        displayImages();  
+    }, [isLoading]);
 
     function fetchImages() : Promise<pictureResponse[]> {
-        return new Promise((resolve) =>{
+        return new Promise((resolve) => {
             const perPage = 20;
             const cleanedQuery = query.trim().toLocaleLowerCase();
             const isMain = cleanedQuery === "";
@@ -74,7 +75,6 @@ export default function ImageContainer({query} : {query: string}) {
                         setImagesLeft(false);
                         console.log("no more images to fetch");
                     }
-                    console.log("retrieved");
                     resolve(results);
                 });
             } else {
@@ -84,81 +84,20 @@ export default function ImageContainer({query} : {query: string}) {
     }
 
     function displayImages() {
-        fetchImages().then((results) => {
-            if (results) {
-                if (page > 1) {
-                    setMainPage([
-                    ...mainPage,
-                    ...results
-                    ]);
-                }
-                else {
-                    setMainPage(results);
-                }
+        if (images) {
+            if (page > 1) {
+                setMainPage([
+                ...mainPage,
+                ...images
+                ]);
             }
-        });
+            else {
+                setMainPage(images);
+            }
+        }
     }
 
-    // function fetchData(page: number) {
-    //     let key: string;
-    //     let call: string;
-    //     const perPage = 20;
-    //     const cleanedQuery = query.trim().toLocaleLowerCase();
-    //     const isMain = cleanedQuery === "";
-    //     if (isMain) {
-    //         key = `MAIN-${page}`;
-    //         call = `https://api.unsplash.com/photos?client_id=${apiKey}&page=${page}&per_page=${perPage}`;
-    //     } else {
-    //         key = `${cleanedQuery}-${page}`;
-    //         call = `https://api.unsplash.com/search/photos?client_id=${apiKey}&query=${cleanedQuery}&page=${page}&per_page=${perPage}`;
-    //     }
-    //     if (imagesLeft) {
-    //         if (key in cache) {
-    //             if (page > 1) {
-    //             setMainPage([
-    //                 ...mainPage,
-    //                 ...cache[key]
-    //             ]);
-    //             } else {
-    //             setMainPage(cache[key]);
-    //             }
-    //             if (cache[key].length < (perPage / 2))  {
-    //                 setImagesLeft(false);
-    //                 console.log("no more images to fetch");
-    //             }
-    //             console.log("retrieved from cache");
-    //         } else {
-    //             fetch(call)
-    //             .then((response) => response.json())
-    //             .then(json => {
-    //             const results = isMain ? json.slice(0, -2) : json.results; // We have to remove last 2 elements because unsplash returns duplicate images from main pages
-    //             if (page > 1) {
-    //                 setMainPage([
-    //                 ...mainPage,
-    //                 ...results
-    //                 ]);
-    //             }
-    //             else {
-    //                 setMainPage(results);
-    //             }
-    //             const newCache = {
-    //                 ...cache,
-    //                 [key]: results
-    //             } 
-    //             setCache(newCache);
-    //             window.localStorage.setItem("cache", JSON.stringify(newCache));
-    //             if (results.length < (perPage / 2)) {
-    //                 setImagesLeft(false);
-    //                 console.log("no more images to fetch");
-    //             }
-    //             console.log("retrieved new");
-    //             });
-    //         }  
-    //     } else {
-    //         console.log("Not fetching");
-    //     }
-    // }
-
+    
     // Modals
 
     function openModalHandler(pic: pictureResponse) {
